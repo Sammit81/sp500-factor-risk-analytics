@@ -18,10 +18,3 @@ sources:
             description: "Trading date"
           - name: CLOSE
             description: "Adjusted closing price"
-      - name: RAW_FUNDAMENTALS_SNAPSHOT
-        description: "Daily 'current' fundamentals snapshot — NOT used for the Value signal (see docs/decisions.md)"
-        columns:
-          - name: TICKER
-            description: "Yahoo Finance ticker symbol"
-          - name: FETCH_DATE
-            description: "Date fundamentals were fetched"

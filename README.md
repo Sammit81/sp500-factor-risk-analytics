@@ -20,10 +20,12 @@ coverage rule, transaction costs, VaR methodology) is documented in
 
 Built in phases, each verified against real BigQuery data before moving to the next:
 
-- ✅ Phase A — ingestion + price-only star schema (momentum, mean reversion, low-vol signals). 251k price rows, 16/16 dbt tests, momentum hand-verified against a manual calculation.
-- ✅ Phase B — point-in-time Value signal. 500/503 tickers backfilled (10,316 quarterly EPS records), 20/20 dbt tests, 3/3 anti-lookahead pytest checks, P/E hand-verified.
-- ⬜ Phase C — backtest engine + anti-lookahead tests
-- ⬜ Phase D — risk analytics, signal comparison, results report
+- ✅ Phase A — ingestion + price-only star schema (momentum, mean reversion, low-vol signals). 5 years of price history, 623k rows, momentum hand-verified against a manual calculation.
+- ✅ Phase B — point-in-time Value signal. 500/503 tickers backfilled (10,316 quarterly EPS records), 20/20 dbt tests, P/E hand-verified.
+- ✅ Phase C — backtest engine + anti-lookahead tests. Two independent lookahead-bias tests (a dbt unit test on the highest-risk join, a pytest integration test on the full engine), both deliberately verified to have teeth by injecting a real bug, confirming the failure, and reverting.
+- ✅ Phase D — risk analytics, signal comparison, results report. See [`reports/output/summary.md`](reports/output/summary.md) — 21/21 pytest, 23/23 dbt tests (22 data + 1 unit test).
+
+**Real result** (49 monthly rebalances, Aug 2022–Aug 2026): the combined 4-signal score didn't beat Momentum alone on raw Sharpe (0.97 vs 1.11), but it did cut annualised volatility from 23.5% to 15.9% and improved max drawdown from -29.0% to -22.4% versus Momentum standalone, while still beating SPY, every other standalone signal, and doing so with less risk than any single factor except Low Volatility. A real, explainable diversification result — reported as-is, not cherry-picked.
 
 ---
 
@@ -69,7 +71,6 @@ uv run data_pipeline/fetch_fundamentals_history.py     # writes dbt_project/seed
 
 # Daily pipeline:
 uv run data_pipeline/fetch_prices.py
-uv run data_pipeline/fetch_fundamentals_snapshot.py
 
 cd dbt_project
 export GCP_PROJECT_ID=irish-market-intelligence BQ_DATASET=SP500_FACTOR_ANALYTICS \

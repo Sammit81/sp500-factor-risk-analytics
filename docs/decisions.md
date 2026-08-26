@@ -19,12 +19,13 @@ overselling the backtest's realism.
 
 ## Value signal: point-in-time EPS, not daily snapshots
 
-The daily fundamentals fetch (`fetch_fundamentals_snapshot.py`, same pattern as the sibling
-`financial-markets-analytics` project) only ever captures *today's* P/E and accumulates forward from
-whenever the pipeline first runs. That makes it structurally unusable for a walk-forward Value
-signal — there's no historical P/E series in it, and backfilling with today's P/E across historical
-dates would be a straightforward lookahead bug (using information from the future to score the
-past).
+The sibling `financial-markets-analytics` project's daily fundamentals fetch pattern (a snapshot
+that only ever captures *today's* P/E and accumulates forward from whenever the pipeline first
+runs) was deliberately NOT reused here — that pattern is structurally unusable for a walk-forward
+Value signal, since there's no historical P/E series in it, and backfilling with today's P/E across
+historical dates would be a straightforward lookahead bug (using information from the future to
+score the past). This project has no daily fundamentals fetch at all; the Value signal is built
+entirely from the one-time backfill below instead.
 
 **Fix**: `fetch_fundamentals_history.py` is a one-time, locally-run script (not part of the daily CI
 pipeline) that backfills quarterly trailing EPS + report dates per ticker via yfinance, saved as

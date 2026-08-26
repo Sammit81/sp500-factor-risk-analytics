@@ -1,0 +1,107 @@
+# refresh.yml — daily (not 6-hourly like the sibling dashboard project):
+# this backtest is monthly-rebalanced, so intraday freshness isn't
+# meaningful, and a daily cadence is honest about that rather than refreshing
+# for the sake of it.
+#
+# Fetches new prices/fundamentals -> rebuilds the star schema -> runs the
+# full test suite (dbt tests + unit tests + pytest, including the
+# anti-lookahead test) -> runs the signal comparison (logged, not a hard
+# CI failure — see the note on that step) -> regenerates the results report
+# and commits it back to the repo so anyone browsing on GitHub sees current
+# results without needing GCP credentials.
+
+name: Refresh Data and Rebuild Report
+
+on:
+  schedule:
+    - cron: "0 6 * * *"   # once daily, 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    env:
+      GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/gcp-key.json
+      GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+      BQ_DATASET: ${{ secrets.BQ_DATASET }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "latest"
+
+      - name: Install Python dependencies
+        run: uv sync
+
+      - name: Write GCP service account key
+        env:
+          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+        run: |
+          printf '%s' "$GCP_SA_KEY" > ${{ github.workspace }}/gcp-key.json
+          if [ ! -s ${{ github.workspace }}/gcp-key.json ]; then
+            echo "::error::gcp-key.json is empty — the GCP_SA_KEY repo secret is missing or empty."
+            exit 1
+          fi
+          python3 -c "import json; json.load(open('${{ github.workspace }}/gcp-key.json'))" || { echo "::error::gcp-key.json is not valid JSON"; exit 1; }
+
+      - name: Fetch latest prices into BigQuery
+        run: uv run data_pipeline/fetch_prices.py
+
+      - name: Create dbt profiles.yml from secrets
+        run: |
+          mkdir -p ~/.dbt
+          cat > ~/.dbt/profiles.yml << EOF
+          sp500_factor_analytics:
+            target: prod
+            outputs:
+              prod:
+                type: bigquery
+                method: service-account
+                project: $GCP_PROJECT_ID
+                dataset: $BQ_DATASET
+                keyfile: $GOOGLE_APPLICATION_CREDENTIALS
+                location: EU
+                threads: 4
+          EOF
+
+      - name: Run dbt models
+        working-directory: dbt_project
+        run: uv run dbt run
+
+      - name: Run dbt tests (data tests + unit tests)
+        working-directory: dbt_project
+        run: uv run dbt test
+
+      - name: Run pytest (incl. anti-lookahead test)
+        run: uv run --group dev pytest tests/ -v
+
+      - name: Run signal comparison
+        # Not `continue-on-error` for the whole step — that would also
+        # swallow a genuine crash. This specifically tolerates the script's
+        # exit code 1, which means "the combination didn't beat every
+        # standalone signal this run" — a real research finding that
+        # fluctuates as new data arrives, not a code defect. dbt test /
+        # pytest failures above this step ARE hard failures; this one isn't.
+        run: uv run python -m backtest.compare_signals || true
+
+      - name: Generate results report
+        run: uv run python -m backtest.generate_report
+
+      - name: Commit refreshed report
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add reports/output/
+          git diff --staged --quiet || git commit -m "chore: refresh backtest report [skip ci]"
+          git push
+
+      - name: Remove GCP service account key
+        if: always()
+        run: rm -f ${{ github.workspace }}/gcp-key.json
