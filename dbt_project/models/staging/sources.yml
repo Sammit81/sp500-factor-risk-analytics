@@ -1,0 +1,27 @@
+# sources.yml — RAW_PRICES lives in the same dataset this project writes to.
+# schema must be set explicitly: omitting it makes dbt default to the source
+# block's `name:` as the dataset, not the target dataset (a bug hit and fixed
+# on the sibling financial-markets-analytics project).
+
+version: 2
+
+sources:
+  - name: raw
+    schema: "{{ env_var('BQ_DATASET') }}"
+    tables:
+      - name: RAW_PRICES
+        description: "Raw OHLCV price data for the S&P 500 universe + SPY, fetched via yfinance"
+        columns:
+          - name: TICKER
+            description: "Yahoo Finance ticker symbol"
+          - name: PRICE_DATE
+            description: "Trading date"
+          - name: CLOSE
+            description: "Adjusted closing price"
+      - name: RAW_FUNDAMENTALS_SNAPSHOT
+        description: "Daily 'current' fundamentals snapshot — NOT used for the Value signal (see docs/decisions.md)"
+        columns:
+          - name: TICKER
+            description: "Yahoo Finance ticker symbol"
+          - name: FETCH_DATE
+            description: "Date fundamentals were fetched"

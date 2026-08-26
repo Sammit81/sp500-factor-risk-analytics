@@ -1,0 +1,41 @@
+version: 2
+
+models:
+  - name: dim_ticker
+    description: "One row per ticker (S&P 500 constituents + SPY benchmark)"
+    columns:
+      - name: TICKER
+        data_tests:
+          - not_null
+          - unique
+
+  - name: fct_price_returns
+    description: "Daily price and return history. Grain: TICKER x PRICE_DATE."
+    columns:
+      - name: TICKER
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_ticker')
+                field: TICKER
+      - name: PRICE_DATE
+        data_tests:
+          - not_null
+      - name: CLOSE_PRICE
+        data_tests:
+          - not_null
+
+  - name: fct_signal_scores
+    description: "Combined and individual factor signal scores. Grain: TICKER x PRICE_DATE."
+    columns:
+      - name: TICKER
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_ticker')
+                field: TICKER
+      - name: PRICE_DATE
+        data_tests:
+          - not_null

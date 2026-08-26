@@ -1,0 +1,15 @@
+version: 2
+
+models:
+  - name: stg_prices
+    description: "Cleaned and type-cast price data for the S&P 500 universe + SPY"
+    columns:
+      - name: TICKER
+        data_tests:
+          - not_null
+      - name: PRICE_DATE
+        data_tests:
+          - not_null
+      - name: CLOSE_PRICE
+        data_tests:
+          - not_null

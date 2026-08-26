@@ -1,0 +1,22 @@
+version: 2
+
+models:
+  - name: int_daily_returns
+    description: "Daily return per ticker"
+    columns:
+      - name: TICKER
+        data_tests:
+          - not_null
+      - name: PRICE_DATE
+        data_tests:
+          - not_null
+
+  - name: int_signal_combined
+    description: "Cross-sectionally combined signal score (Phase A: 3 signals)"
+    columns:
+      - name: TICKER
+        data_tests:
+          - not_null
+      - name: PRICE_DATE
+        data_tests:
+          - not_null
