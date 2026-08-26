@@ -9,6 +9,7 @@ SELECT
     MOMENTUM_ZSCORE,
     MEAN_REVERSION_ZSCORE,
     LOW_VOL_ZSCORE,
+    VALUE_ZSCORE,
     COMBINED_SCORE,
     IS_ELIGIBLE
 FROM {{ ref('int_signal_combined') }}

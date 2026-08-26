@@ -1,0 +1,20 @@
+version: 2
+
+seeds:
+  - name: sp500_constituents
+    description: "S&P 500 constituent list, scraped once from Wikipedia (see docs/decisions.md for the survivorship-bias limitation this implies)"
+    columns:
+      - name: ticker
+        data_tests:
+          - not_null
+          - unique
+
+  - name: pointintime_eps_history
+    description: "Point-in-time trailing-4-quarter EPS per ticker per earnings report date — the lookahead-safe input to the Value signal (see docs/decisions.md)"
+    columns:
+      - name: ticker
+        data_tests:
+          - not_null
+      - name: report_date
+        data_tests:
+          - not_null

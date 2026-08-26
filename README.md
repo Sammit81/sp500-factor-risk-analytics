@@ -20,8 +20,8 @@ coverage rule, transaction costs, VaR methodology) is documented in
 
 Built in phases, each verified against real BigQuery data before moving to the next:
 
-- ⬜ Phase A — ingestion + price-only star schema (momentum, mean reversion, low-vol signals)
-- ⬜ Phase B — point-in-time Value signal
+- ✅ Phase A — ingestion + price-only star schema (momentum, mean reversion, low-vol signals). 251k price rows, 16/16 dbt tests, momentum hand-verified against a manual calculation.
+- ✅ Phase B — point-in-time Value signal. 500/503 tickers backfilled (10,316 quarterly EPS records), 20/20 dbt tests, 3/3 anti-lookahead pytest checks, P/E hand-verified.
 - ⬜ Phase C — backtest engine + anti-lookahead tests
 - ⬜ Phase D — risk analytics, signal comparison, results report
 
@@ -84,5 +84,5 @@ uv run python -m backtest.compare_signals
 uv run python reports/generate_report.py
 
 # Tests:
-uv run pytest
+uv run --group dev pytest
 ```
