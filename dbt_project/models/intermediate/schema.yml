@@ -11,8 +11,8 @@ models:
         data_tests:
           - not_null
 
-  - name: int_signal_combined
-    description: "Cross-sectionally combined signal score (Phase A: 3 signals)"
+  - name: int_pointintime_pe
+    description: "Lookahead-safe point-in-time P/E — see the unit test below and docs/decisions.md"
     columns:
       - name: TICKER
         data_tests:
@@ -20,3 +20,40 @@ models:
       - name: PRICE_DATE
         data_tests:
           - not_null
+
+  - name: int_signal_combined
+    description: "Cross-sectionally combined signal score across all 4 signals (momentum, mean reversion, low-vol, value)"
+    columns:
+      - name: TICKER
+        data_tests:
+          - not_null
+      - name: PRICE_DATE
+        data_tests:
+          - not_null
+
+unit_tests:
+  - name: test_pointintime_pe_ignores_future_eps_reports
+    description: >
+      The core anti-lookahead invariant for the Value signal: an EPS report
+      dated on or after the price date must never be used to compute that
+      date's P/E. This is the single highest-risk join in the whole project
+      (see docs/decisions.md) — a fixture makes it impossible to regress
+      silently. Three EPS rows are given for the same ticker: one genuinely
+      earlier (must be used), one dated the SAME day as the price (must NOT
+      be used — the join is strictly `<`, not `<=`), and one dated after
+      (must NOT be used). If the join direction were ever flipped, this
+      test would fail immediately with an obviously-wrong PE_RATIO (using
+      trailing_eps=999 instead of 5.0).
+    model: int_pointintime_pe
+    given:
+      - input: ref('stg_prices')
+        rows:
+          - { TICKER: TEST, PRICE_DATE: "2024-06-15", CLOSE_PRICE: 100.0 }
+      - input: ref('pointintime_eps_history')
+        rows:
+          - { ticker: TEST, report_date: "2024-01-01", trailing_eps: 5.0 }
+          - { ticker: TEST, report_date: "2024-06-15", trailing_eps: 999.0 }
+          - { ticker: TEST, report_date: "2024-07-01", trailing_eps: 999.0 }
+    expect:
+      rows:
+        - { TICKER: TEST, PRICE_DATE: "2024-06-15", TRAILING_EPS: 5.0, PE_RATIO: 20.0 }

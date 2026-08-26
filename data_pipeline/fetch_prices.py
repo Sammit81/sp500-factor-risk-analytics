@@ -35,7 +35,10 @@ from data_pipeline.bigquery_client import get_connection, table_ref
 
 load_dotenv()
 
-HISTORY_DAYS = 730   # 2 years on first run
+HISTORY_DAYS = 1825  # 5 years on first run — matches the EPS backfill's depth. A shorter
+                      # window (originally 730 days) left momentum's 252-trading-day lookback
+                      # eating most of the price history, leaving only ~13 rebalances with all
+                      # 4 signals eligible — too small a sample for the signal comparison to mean much.
 TABLE_NAME   = "RAW_PRICES"
 CHUNK_SIZE   = 50
 SEED_PATH    = Path(__file__).parent.parent / "dbt_project" / "seeds" / "sp500_constituents.csv"

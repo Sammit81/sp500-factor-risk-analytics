@@ -37,12 +37,16 @@ report date the market is assumed to actually know the number. Currently `0` (re
 treated as the earliest usable date) — conservative would be a few days for filing/dissemination lag;
 documented here so the assumption can be changed and argued with, not discovered by reading SQL.
 
-**Known limitation — backtest window length**: yfinance's quarterly fundamentals history is
-realistically bounded to roughly 2-4 years per ticker. That means the full multi-signal backtest
-(which needs all 4 signals, including Value) covers ~24-48 independent monthly rebalances at most.
-That's a small sample for time-series inference — Sharpe ratios and other risk-adjusted metrics from
-this backtest should be read as directional, not statistically definitive. Said plainly here rather
-than over-claiming.
+**Known limitation — backtest window length**: momentum's 252-trading-day lookback is actually the
+binding constraint on usable history, not the EPS depth — with 5 years of price history fetched
+(`HISTORY_DAYS = 1825`, extended from an initial 730-day/2-year attempt specifically because that
+first attempt left only ~13 rebalances with all 4 signals eligible), the backtest has **49 monthly
+rebalances with a fully eligible universe, spanning ~August 2022 to August 2026** (the first year is
+"burn-in" while momentum's lookback fills in). 49 rebalances is a real, usable sample — better than
+the initial 13 — but it's still a modest sample for time-series inference by normal statistical
+standards. Sharpe ratios and other risk-adjusted metrics from this backtest should be read as
+directional evidence, not statistically definitive conclusions. Said plainly here rather than
+over-claiming.
 
 ## Coverage rule: require all 4 signals, no partial averaging
 
