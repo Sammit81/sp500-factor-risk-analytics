@@ -39,3 +39,55 @@ models:
       - name: PRICE_DATE
         data_tests:
           - not_null
+
+  - name: dim_date
+    description: "Standard date dimension, 2020-2030, for the Power BI layer"
+    columns:
+      - name: Date
+        data_tests:
+          - not_null
+          - unique
+
+  - name: dim_strategy
+    description: "One row per backtest strategy, classified by StrategyType"
+    columns:
+      - name: Strategy
+        data_tests:
+          - not_null
+          - unique
+
+  - name: fct_backtest_returns
+    description: "Daily returns per strategy. Grain: Strategy x Date."
+    columns:
+      - name: Strategy
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_strategy')
+                field: Strategy
+      - name: Date
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: Date
+
+  - name: fct_backtest_turnover
+    description: "Per-rebalance turnover, cost, and holding count per strategy. Grain: Strategy x RebalanceDate."
+    columns:
+      - name: Strategy
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_strategy')
+                field: Strategy
+      - name: RebalanceDate
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: Date

@@ -13,3 +13,23 @@ models:
       - name: CLOSE_PRICE
         data_tests:
           - not_null
+
+  - name: stg_backtest_returns
+    description: "Cleaned daily returns per strategy"
+    columns:
+      - name: STRATEGY
+        data_tests:
+          - not_null
+      - name: RETURN_DATE
+        data_tests:
+          - not_null
+
+  - name: stg_backtest_turnover
+    description: "Cleaned per-rebalance turnover per strategy"
+    columns:
+      - name: STRATEGY
+        data_tests:
+          - not_null
+      - name: REBALANCE_DATE
+        data_tests:
+          - not_null

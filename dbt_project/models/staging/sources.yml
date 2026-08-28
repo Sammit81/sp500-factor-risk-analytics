@@ -18,3 +18,18 @@ sources:
             description: "Trading date"
           - name: CLOSE
             description: "Adjusted closing price"
+      - name: RAW_BACKTEST_RETURNS
+        description: "Daily returns per strategy (4 standalone signals, combined, long-short diagnostic, SPY benchmark), written by backtest/persist_results.py. Full overwrite each run, not incremental."
+        columns:
+          - name: STRATEGY
+            description: "Strategy label, e.g. 'Momentum', 'Combined (all 4)', 'SPY (benchmark)'"
+          - name: DATE
+          - name: DAILY_RETURN
+      - name: RAW_BACKTEST_TURNOVER
+        description: "Per-rebalance turnover, transaction cost, and holding count per strategy"
+        columns:
+          - name: STRATEGY
+          - name: REBALANCE_DATE
+          - name: TURNOVER
+          - name: COST
+          - name: N_HOLDINGS
