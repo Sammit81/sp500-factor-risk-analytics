@@ -2,11 +2,11 @@
 
 | Strategy | Ann. Return | Ann. Vol | Sharpe | Max DD | Excess Ret | Info Ratio |
 |---|---:|---:|---:|---:|---:|---:|
-| Momentum | 27.24% | 24.19% | 0.95 | -28.96% | 15.39% | 0.85 |
-| Mean Reversion | 17.21% | 23.78% | 0.62 | -28.84% | 5.36% | 0.41 |
-| Low Volatility | 6.12% | 12.61% | 0.22 | -18.43% | -5.73% | -0.41 |
-| Value | 17.07% | 20.02% | 0.69 | -23.87% | 5.22% | 0.39 |
-| Combined (all 4) | 18.84% | 15.94% | 0.91 | -22.41% | 6.99% | 0.51 |
-| SPY (benchmark) | 11.89% | 17.12% | 0.51 | -24.50% | - | - |
+| Momentum | 26.31% | 24.23% | 0.92 | -28.96% | 14.89% | 0.82 |
+| Mean Reversion | 16.59% | 23.80% | 0.60 | -28.84% | 5.17% | 0.39 |
+| Low Volatility | 6.07% | 12.60% | 0.21 | -18.43% | -5.36% | -0.38 |
+| Value | 16.92% | 20.02% | 0.68 | -23.87% | 5.49% | 0.41 |
+| Combined (all 4) | 18.53% | 15.94% | 0.90 | -22.41% | 7.11% | 0.52 |
+| SPY (benchmark) | 11.47% | 17.14% | 0.49 | -24.50% | - | - |
 
 See docs/decisions.md for methodology, assumptions, and known limitations (survivorship bias, point-in-time Value signal construction, sample size).
